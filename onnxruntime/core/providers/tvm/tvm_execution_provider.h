@@ -4,10 +4,7 @@
 #ifndef TVM_EXECUTION_PROVIDER_H
 #define TVM_EXECUTION_PROVIDER_H
 
-#include <string>
-#include <vector>
 #include <memory>
-#include <unordered_map>
 
 #include "core/framework/execution_provider.h"
 
