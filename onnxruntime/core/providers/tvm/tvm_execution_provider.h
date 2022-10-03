@@ -9,12 +9,9 @@
 #include <memory>
 #include <unordered_map>
 
-#include "core/common/logging/logging.h"
 #include "core/framework/execution_provider.h"
-#include "core/platform/ort_mutex.h"
 
-#include "tvm_compiler.h"
-#include "tvm_runner.h"
+#include "tvm_ep_options.h"
 
 
 namespace onnxruntime {
@@ -27,7 +24,7 @@ class TvmExecutionProvider : public IExecutionProvider {
 
   std::vector<std::unique_ptr<ComputeCapability>>
   GetCapability(const onnxruntime::GraphViewer& graph,
-                const IKernelLookup& /*kernel_lookup*/) const override;
+                const IKernelLookup& kernel_lookup) const override;
 
  private:
   TvmEPOptions options_;

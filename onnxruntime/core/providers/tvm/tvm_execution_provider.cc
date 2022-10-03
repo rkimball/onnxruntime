@@ -15,10 +15,6 @@
 #include "core/graph/model.h"
 
 #include "tvm_execution_provider.h"
-#include "xpu_data_transfer.h"
-#include "tvm_allocator.h"
-#include "tvm_utils.h"
-#include "tvm_api.h"
 
 
 using namespace ONNX_NAMESPACE;
@@ -35,7 +31,7 @@ TvmExecutionProvider::~TvmExecutionProvider() {}
 
 std::vector<std::unique_ptr<ComputeCapability>>
 TvmExecutionProvider::GetCapability(const GraphViewer& graph_viewer,
-                                    const IKernelLookup& /*kernel_lookup*/) const {
+                                    const IKernelLookup&) const {
   std::vector<std::unique_ptr<ComputeCapability>> result;
   return result;
 }
