@@ -36,16 +36,8 @@ class TvmExecutionProvider : public IExecutionProvider {
   GetCapability(const onnxruntime::GraphViewer& graph,
                 const IKernelLookup& /*kernel_lookup*/) const override;
 
-  common::Status Compile(const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
-                         std::vector<NodeComputeInfo>& node_compute_funcs) override;
-  std::unique_ptr<onnxruntime::IDataTransfer> GetDataTransfer() const override;
-  AllocatorPtr GetAllocator(int id, OrtMemType mem_type) const override;
-
  private:
   void printOptions();
-  std::shared_ptr<TvmModule> compileModel(const std::string& func_name,
-                                          const GraphViewer& graph_viewer,
-                                          InputsInfoMap& inputs_info);    // NOLINT
   void setInputShapesForFreezedNN(const GraphViewer& graph_viewer,
                                   TVMTensorShapes& input_shapes,          // NOLINT
                                   InputsInfoMap& all_input_shapes);       // NOLINT
@@ -56,15 +48,9 @@ class TvmExecutionProvider : public IExecutionProvider {
   TensorShapeVector convertTensorShape(const ONNX_NAMESPACE::TensorShapeProto& shape_proto);
   void prepareOutputTensors(const std::shared_ptr<TvmModule>& mod,
                             std::vector<DLTensor>& output_tensors, size_t num);  // NOLINT
-  NodeComputeInfo prepareComputeInfo(const std::string& func_name);
-  int createStateFunc(ComputeContext*, FunctionState*);
 
  private:
   TvmEPOptions options_;
-  Compilers compilers_;
-  Runners runners_;
-  bool dump_subgraphs_ = false;
-  AllocatorPtr allocator_;
 };
 
 }  // namespace tvm
