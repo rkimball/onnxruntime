@@ -92,46 +92,46 @@ TvmExecutionProvider::GetCapability(const GraphViewer& graph_viewer,
 
 
 
-  const auto& init_tensors = graph_viewer.GetAllInitializedTensors();
+  // const auto& init_tensors = graph_viewer.GetAllInitializedTensors();
 
-  std::unordered_set<std::string> required_initializers;
-  const std::vector<NodeIndex>& sorted_nodes = graph_viewer.GetNodesInTopologicalOrder();
-  std::unique_ptr<IndexedSubGraph> sub_graph = std::make_unique<IndexedSubGraph>();
-  for (auto& node_idx : sorted_nodes) {
-    graph_viewer.GetNode(node_idx)->ForEachDef([&required_initializers, &init_tensors]
-                                               (const NodeArg& node_arg, bool is_input) {
-              if(is_input && init_tensors.count(node_arg.Name())) {
-                  required_initializers.insert(node_arg.Name());
-              } }, true);
-  }
+  // std::unordered_set<std::string> required_initializers;
+  // const std::vector<NodeIndex>& sorted_nodes = graph_viewer.GetNodesInTopologicalOrder();
+  // std::unique_ptr<IndexedSubGraph> sub_graph = std::make_unique<IndexedSubGraph>();
+  // for (auto& node_idx : sorted_nodes) {
+  //   graph_viewer.GetNode(node_idx)->ForEachDef([&required_initializers, &init_tensors]
+  //                                              (const NodeArg& node_arg, bool is_input) {
+  //             if(is_input && init_tensors.count(node_arg.Name())) {
+  //                 required_initializers.insert(node_arg.Name());
+  //             } }, true);
+  // }
 
-  auto meta_def = std::make_unique<::onnxruntime::IndexedSubGraph::MetaDef>();
-  meta_def->name = "TVMStandalone";
-  meta_def->domain = "StandaloneTest";
-  std::vector<std::string> inputs;
-  std::vector<std::string> outputs;
+  // auto meta_def = std::make_unique<::onnxruntime::IndexedSubGraph::MetaDef>();
+  // meta_def->name = "TVMStandalone";
+  // meta_def->domain = "StandaloneTest";
+  // std::vector<std::string> inputs;
+  // std::vector<std::string> outputs;
 
-  for (auto& nodeArgPtr : graph_viewer.GetInputs()) {
-    inputs.push_back(nodeArgPtr->Name());
-  }
+  // for (auto& nodeArgPtr : graph_viewer.GetInputs()) {
+  //   inputs.push_back(nodeArgPtr->Name());
+  // }
 
-  for (auto& name : required_initializers) {
-    inputs.push_back(name);
-  }
+  // for (auto& name : required_initializers) {
+  //   inputs.push_back(name);
+  // }
 
-  for (auto& nodeArgPtr : graph_viewer.GetOutputs()) {
-    outputs.push_back(nodeArgPtr->Name());
-  }
-  meta_def->inputs = inputs;
-  meta_def->outputs = outputs;
-  meta_def->since_version = 1;
-  meta_def->status = ONNX_NAMESPACE::EXPERIMENTAL;
-  sub_graph->SetMetaDef(std::move(meta_def));
-  sub_graph->nodes = sorted_nodes;
-  result.push_back(
-      std::make_unique<ComputeCapability>(std::move(sub_graph)));
-  std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
-  return result;
+  // for (auto& nodeArgPtr : graph_viewer.GetOutputs()) {
+  //   outputs.push_back(nodeArgPtr->Name());
+  // }
+  // meta_def->inputs = inputs;
+  // meta_def->outputs = outputs;
+  // meta_def->since_version = 1;
+  // meta_def->status = ONNX_NAMESPACE::EXPERIMENTAL;
+  // sub_graph->SetMetaDef(std::move(meta_def));
+  // sub_graph->nodes = sorted_nodes;
+  // result.push_back(
+  //     std::make_unique<ComputeCapability>(std::move(sub_graph)));
+  // std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
+  // return result;
 }
 
 // const KernelCreateInfo* TvmExecutionProvider::LookUpKernel(const Node& node) const {
