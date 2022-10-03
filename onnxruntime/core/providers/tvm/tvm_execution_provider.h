@@ -18,16 +18,9 @@
 
 
 namespace onnxruntime {
-  class Graph;
-  class NodeArg;
 namespace tvm {
 
 class TvmExecutionProvider : public IExecutionProvider {
-  using Compiler = TVMCompilerBase;
-  using Compilers = std::unordered_map<std::string, std::shared_ptr<Compiler>>;
-  using Runner = TVMRunner;
-  using Runners = std::unordered_map<std::string, std::shared_ptr<Runner>>;
-
  public:
   explicit TvmExecutionProvider(const TvmEPOptions& options);
   virtual ~TvmExecutionProvider();
