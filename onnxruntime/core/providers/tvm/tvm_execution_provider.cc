@@ -58,10 +58,39 @@ TvmExecutionProvider::~TvmExecutionProvider() {}
 std::vector<std::unique_ptr<ComputeCapability>>
 TvmExecutionProvider::GetCapability(const GraphViewer& graph_viewer,
                                     const IKernelLookup& /*kernel_lookup*/) const {
+  std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
+
+
+  // Only support nodes in the octoml.ai domain
+  // Only support a graph with a single node
+  const std::string supported_domain = "octoml.ai";
+  bool is_supported = true;
+  for(auto& node : graph_viewer.Nodes()) {
+    std::cout << __FILE__ << " " << __LINE__ << " name=" << node.Name() << std::endl;
+    std::cout << __FILE__ << " " << __LINE__ << " optype=" << node.OpType() << std::endl;
+    std::cout << __FILE__ << " " << __LINE__ << " domain=" << node.Domain() << std::endl;
+    is_supported &= (node.Domain() == supported_domain);
+    std::cout << __FILE__ << " " << __LINE__ << " supported=" << is_supported << std::endl;
+  }
+
+
+
+
   std::vector<std::unique_ptr<ComputeCapability>> result;
   if (graph_viewer.IsSubgraph()) {
+    std::cout << __FILE__ << " " << __LINE__ << " is subgraph" << std::endl;
     return result;
   }
+  std::cout << __FILE__ << " " << __LINE__ << " not subgraph" << std::endl;
+
+  std::unique_ptr<IndexedSubGraph> sub_graph = std::make_unique<IndexedSubGraph>();
+  sub_graph->nodes = graph_viewer.GetNodesInTopologicalOrder();
+  result.push_back(
+      std::make_unique<ComputeCapability>(std::move(sub_graph)));
+  return result;
+
+
+
 
   const auto& init_tensors = graph_viewer.GetAllInitializedTensors();
 
@@ -101,47 +130,65 @@ TvmExecutionProvider::GetCapability(const GraphViewer& graph_viewer,
   sub_graph->nodes = sorted_nodes;
   result.push_back(
       std::make_unique<ComputeCapability>(std::move(sub_graph)));
+  std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
   return result;
 }
 
+// const KernelCreateInfo* TvmExecutionProvider::LookUpKernel(const Node& node) const {
+//   std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
+// }
+
 common::Status TvmExecutionProvider::Compile(const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
                                              std::vector<NodeComputeInfo>& node_compute_funcs) {
-  printOptions();
+  std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
+  // printOptions();
   for (auto& fused_node_graph : fused_nodes_and_graphs) {
+    std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
     const GraphViewer& graph_body_viewer = fused_node_graph.filtered_graph;
+    std::cout << __FILE__ << " " << __LINE__ << " path=" << graph_body_viewer.ModelPath().ToPathString() << std::endl;
+    for(auto& node : graph_body_viewer.Nodes()) {
+      std::cout << __FILE__ << " " << __LINE__ << " name=" << node.Name() << std::endl;
+      std::cout << __FILE__ << " " << __LINE__ << " optype=" << node.OpType() << std::endl;
+      std::cout << __FILE__ << " " << __LINE__ << " domain=" << node.Domain() << std::endl;
+    }
     const Node& fused_node = fused_node_graph.fused_node;
     const std::string func_name = fused_node.Name();
+    std::cout << __FILE__ << " " << __LINE__ << " func_name " << func_name << std::endl;
     Model model(graph_body_viewer.Name(), true, ModelMetaData(), PathString(),
                 IOnnxRuntimeOpSchemaRegistryList(), graph_body_viewer.DomainToVersionMap(),
                              std::vector<ONNX_NAMESPACE::FunctionProto>(), *GetLogger());
-    ONNX_NAMESPACE::ModelProto model_proto = model.ToProto();
-    // TVM EP is using static lib approach, so invoke serializer directly.
-    GraphViewerToProto(graph_body_viewer, *model_proto.mutable_graph(), true, true);
-    auto opset = model_proto.add_opset_import();
-    opset->set_domain(kOnnxDomain);
-    opset->set_version(graph_body_viewer.DomainToVersionMap().at(kOnnxDomain));
+  //   ONNX_NAMESPACE::ModelProto model_proto = model.ToProto();
+  //   // TVM EP is using static lib approach, so invoke serializer directly.
+  //   GraphViewerToProto(graph_body_viewer, *model_proto.mutable_graph(), true, true);
+  //   auto opset = model_proto.add_opset_import();
+  //   opset->set_domain(kOnnxDomain);
+  //   opset->set_version(graph_body_viewer.DomainToVersionMap().at(kOnnxDomain));
 
-    std::string onnx_model_str;
-    model_proto.SerializeToString(&onnx_model_str);
-    compilers_[func_name] = std::make_shared<TVMCompiler>(std::move(onnx_model_str),
-                              ToUTF8String(fused_node.ModelPath().ToPathString()),
-                              int(opset->version()));
-    InputsInfoMap all_input_shapes;
-    auto mod = compileModel(func_name, graph_body_viewer, all_input_shapes);
+  //   std::string onnx_model_str;
+  //   model_proto.SerializeToString(&onnx_model_str);
+  //   compilers_[func_name] = std::make_shared<TVMCompiler>(std::move(onnx_model_str),
+  //                             ToUTF8String(fused_node.ModelPath().ToPathString()),
+  //                             int(opset->version()));
+  //   InputsInfoMap all_input_shapes;
+  //   auto mod = compileModel(func_name, graph_body_viewer, all_input_shapes);
 
-    std::vector<DLTensor> output_tensors;
-    prepareOutputTensors(mod, output_tensors, graph_body_viewer.GetOutputs().size());
+  //   std::vector<DLTensor> output_tensors;
+  //   prepareOutputTensors(mod, output_tensors, graph_body_viewer.GetOutputs().size());
 
-    runners_[func_name] = std::make_shared<Runner>(options_, mod, all_input_shapes, output_tensors);
+  //   runners_[func_name] = std::make_shared<Runner>(options_, mod, all_input_shapes, output_tensors);
 
-    if (dump_subgraphs_) {
-        std::fstream dump("/tmp/" + func_name + ".onnx",
-                          std::ios::out | std::ios::trunc | std::ios::binary);
-        model_proto.SerializeToOstream(&dump);
-    }
+  //   if (dump_subgraphs_) {
+  //       std::fstream dump("/tmp/" + func_name + ".onnx",
+  //                         std::ios::out | std::ios::trunc | std::ios::binary);
+  //       model_proto.SerializeToOstream(&dump);
+  //   }
 
-    // TODO(vvchernov): implement ops checking and mechanism of gracefully passing the responsibility to other EPs
-    // if the checking fails due to unsupported op(s)
+  //   // TODO(vvchernov): implement ops checking and mechanism of gracefully passing the responsibility to other EPs
+  //   // if the checking fails due to unsupported op(s)
+
+
+// using ComputeFunc = std::function<Status(FunctionState, const OrtApi*, OrtKernelContext*)>;
+
     NodeComputeInfo compute_info = prepareComputeInfo(func_name);
 
     node_compute_funcs.push_back(compute_info);
