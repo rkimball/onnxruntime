@@ -58,85 +58,9 @@ TvmExecutionProvider::~TvmExecutionProvider() {}
 std::vector<std::unique_ptr<ComputeCapability>>
 TvmExecutionProvider::GetCapability(const GraphViewer& graph_viewer,
                                     const IKernelLookup& /*kernel_lookup*/) const {
-  std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
-
-
-  // Only support nodes in the octoml.ai domain
-  // Only support a graph with a single node
-  const std::string supported_domain = "octoml.ai";
-  bool is_supported = true;
-  for(auto& node : graph_viewer.Nodes()) {
-    std::cout << __FILE__ << " " << __LINE__ << " name=" << node.Name() << std::endl;
-    std::cout << __FILE__ << " " << __LINE__ << " optype=" << node.OpType() << std::endl;
-    std::cout << __FILE__ << " " << __LINE__ << " domain=" << node.Domain() << std::endl;
-    is_supported &= (node.Domain() == supported_domain);
-    std::cout << __FILE__ << " " << __LINE__ << " supported=" << is_supported << std::endl;
-  }
-
-
-
-
   std::vector<std::unique_ptr<ComputeCapability>> result;
-  if (graph_viewer.IsSubgraph()) {
-    std::cout << __FILE__ << " " << __LINE__ << " is subgraph" << std::endl;
-    return result;
-  }
-  std::cout << __FILE__ << " " << __LINE__ << " not subgraph" << std::endl;
-
-  std::unique_ptr<IndexedSubGraph> sub_graph = std::make_unique<IndexedSubGraph>();
-  sub_graph->nodes = graph_viewer.GetNodesInTopologicalOrder();
-  result.push_back(
-      std::make_unique<ComputeCapability>(std::move(sub_graph)));
   return result;
-
-
-
-
-  // const auto& init_tensors = graph_viewer.GetAllInitializedTensors();
-
-  // std::unordered_set<std::string> required_initializers;
-  // const std::vector<NodeIndex>& sorted_nodes = graph_viewer.GetNodesInTopologicalOrder();
-  // std::unique_ptr<IndexedSubGraph> sub_graph = std::make_unique<IndexedSubGraph>();
-  // for (auto& node_idx : sorted_nodes) {
-  //   graph_viewer.GetNode(node_idx)->ForEachDef([&required_initializers, &init_tensors]
-  //                                              (const NodeArg& node_arg, bool is_input) {
-  //             if(is_input && init_tensors.count(node_arg.Name())) {
-  //                 required_initializers.insert(node_arg.Name());
-  //             } }, true);
-  // }
-
-  // auto meta_def = std::make_unique<::onnxruntime::IndexedSubGraph::MetaDef>();
-  // meta_def->name = "TVMStandalone";
-  // meta_def->domain = "StandaloneTest";
-  // std::vector<std::string> inputs;
-  // std::vector<std::string> outputs;
-
-  // for (auto& nodeArgPtr : graph_viewer.GetInputs()) {
-  //   inputs.push_back(nodeArgPtr->Name());
-  // }
-
-  // for (auto& name : required_initializers) {
-  //   inputs.push_back(name);
-  // }
-
-  // for (auto& nodeArgPtr : graph_viewer.GetOutputs()) {
-  //   outputs.push_back(nodeArgPtr->Name());
-  // }
-  // meta_def->inputs = inputs;
-  // meta_def->outputs = outputs;
-  // meta_def->since_version = 1;
-  // meta_def->status = ONNX_NAMESPACE::EXPERIMENTAL;
-  // sub_graph->SetMetaDef(std::move(meta_def));
-  // sub_graph->nodes = sorted_nodes;
-  // result.push_back(
-  //     std::make_unique<ComputeCapability>(std::move(sub_graph)));
-  // std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
-  // return result;
 }
-
-// const KernelCreateInfo* TvmExecutionProvider::LookUpKernel(const Node& node) const {
-//   std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
-// }
 
 common::Status TvmExecutionProvider::Compile(const std::vector<FusedNodeAndGraph>& fused_nodes_and_graphs,
                                              std::vector<NodeComputeInfo>& node_compute_funcs) {

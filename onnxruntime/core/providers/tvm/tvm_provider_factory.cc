@@ -18,7 +18,6 @@ struct TvmProviderFactory : IExecutionProviderFactory {
   ~TvmProviderFactory() = default;
 
   std::unique_ptr<IExecutionProvider> CreateProvider() override {
-    std::cout << __FILE__ << " " << __LINE__ << " **************************************" << std::endl;
     std::unique_ptr<IExecutionProvider> provider = nullptr;
     if (options_.so_folder != "") {
       ORT_ENFORCE(options_.executor == "vm",
