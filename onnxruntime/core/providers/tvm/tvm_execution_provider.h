@@ -37,19 +37,6 @@ class TvmExecutionProvider : public IExecutionProvider {
                 const IKernelLookup& /*kernel_lookup*/) const override;
 
  private:
-  void printOptions();
-  void setInputShapesForFreezedNN(const GraphViewer& graph_viewer,
-                                  TVMTensorShapes& input_shapes,          // NOLINT
-                                  InputsInfoMap& all_input_shapes);       // NOLINT
-  void setInputShapesForUnfreezedNN(const GraphViewer& graph_viewer,
-                                    TVMTensorShapes& input_shapes,        // NOLINT
-                                    InputsInfoMap& all_input_shapes);     // NOLINT
-  TensorShapeVector getInputShape(const NodeArg* node);
-  TensorShapeVector convertTensorShape(const ONNX_NAMESPACE::TensorShapeProto& shape_proto);
-  void prepareOutputTensors(const std::shared_ptr<TvmModule>& mod,
-                            std::vector<DLTensor>& output_tensors, size_t num);  // NOLINT
-
- private:
   TvmEPOptions options_;
 };
 
